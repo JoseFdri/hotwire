@@ -7,7 +7,7 @@ import { LiveFunction } from "../src/LiveFunction.js";
 const FIXTURE_ENTRY = join(__dirname, "fixtures", "handler.ts");
 
 function synth(live: boolean): { template: Template; fn: LiveFunction } {
-  const app = new App({ context: live ? { "local-lambda:live": "true" } : {} });
+  const app = new App({ context: live ? { "bifrost:live": "true" } : {} });
   const stack = new Stack(app, "TestStack", { env: { account: "123456789012", region: "us-east-1" } });
   const fn = new LiveFunction(stack, "MyFn", {
     entry: FIXTURE_ENTRY,
@@ -23,7 +23,7 @@ describe("LiveFunction", () => {
 
     template.hasResourceProperties("AWS::Lambda::Function", {
       Environment: {
-        Variables: Match.not(Match.objectLike({ LOCAL_LAMBDA_FUNCTION_ID: Match.anyValue() })),
+        Variables: Match.not(Match.objectLike({ BIFROST_FUNCTION_ID: Match.anyValue() })),
       },
     });
 
@@ -45,9 +45,9 @@ describe("LiveFunction", () => {
       Timeout: 900,
       Environment: {
         Variables: Match.objectLike({
-          LOCAL_LAMBDA_APP: "TestStack",
-          LOCAL_LAMBDA_STAGE: "dev",
-          LOCAL_LAMBDA_FUNCTION_ID: "TestStack/MyFn",
+          BIFROST_APP: "TestStack",
+          BIFROST_STAGE: "dev",
+          BIFROST_FUNCTION_ID: "TestStack/MyFn",
         }),
       },
     });

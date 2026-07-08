@@ -1,8 +1,8 @@
 {
-  "name": "local-lambda",
+  "name": "bifrost",
   "version": "0.0.0",
   "bin": {
-    "local-lambda": "./dist/index.js"
+    "bifrost": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -10,7 +10,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@local-lambda/core": "0.0.0",
+    "@bifrost/core": "0.0.0",
     "@aws-sdk/client-iot": "^3.629.0",
     "@aws-sdk/client-s3": "^3.629.0",
     "@aws-sdk/client-sts": "^3.629.0",

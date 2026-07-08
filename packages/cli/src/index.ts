@@ -5,12 +5,12 @@ import { runDev } from "./dev.js";
 
 const program = new Command();
 
-program.name("local-lambda").description("Live Lambda Dev for AWS CDK").version("0.0.0");
+program.name("bifrost").description("Live Lambda Dev for AWS CDK").version("0.0.0");
 
 program
   .command("dev")
   .description("Run live functions locally, forwarding real invocations from deployed AWS resources")
-  .requiredOption("--stage <stage>", "deployment stage (must match the stack you deployed with -c local-lambda:live=true)")
+  .requiredOption("--stage <stage>", "deployment stage (must match the stack you deployed with -c bifrost:live=true)")
   .option("--app <dir>", "directory containing the CDK app", process.cwd())
   .option("--region <region>", "AWS region (defaults to your AWS config/credential chain)")
   .action(async (opts: { stage: string; app: string; region?: string }) => {

@@ -87,7 +87,7 @@ export async function fromBodyRef(ref: BodyRef, scratch: ScratchStore): Promise<
 }
 
 export function topicPrefix(appName: string, stage: string): string {
-  return `local-lambda/${appName}/${stage}`;
+  return `bifrost/${appName}/${stage}`;
 }
 
 export function requestTopic(appName: string, stage: string, functionId: string): string {
@@ -108,5 +108,5 @@ export function responseTopicFilter(appName: string, stage: string, functionId: 
 }
 
 export function scratchKey(requestId: string, direction: "request" | "response"): string {
-  return `local-lambda/${requestId}/${direction}.json.gz`;
+  return `bifrost/${requestId}/${direction}.json.gz`;
 }

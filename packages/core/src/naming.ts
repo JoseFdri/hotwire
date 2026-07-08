@@ -5,7 +5,7 @@
  * name never needs to round-trip through `cdk synth` output.
  */
 export function scratchBucketName(account: string, region: string, appName: string, stage: string): string {
-  const raw = `local-lambda-${appName}-${stage}-${account}-${region}`.toLowerCase();
+  const raw = `bifrost-${appName}-${stage}-${account}-${region}`.toLowerCase();
   const sanitized = raw.replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-+|-+$/g, "");
   return sanitized.slice(0, 63).replace(/-+$/g, "");
 }

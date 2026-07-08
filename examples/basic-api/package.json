@@ -5,10 +5,10 @@
   "scripts": {
     "synth": "cdk synth",
     "deploy": "cdk deploy",
-    "dev": "local-lambda dev --stage dev"
+    "dev": "bifrost dev --stage dev"
   },
   "dependencies": {
-    "@local-lambda/construct": "0.0.0",
+    "@bifrost/construct": "0.0.0",
     "aws-cdk-lib": "^2.261.0",
     "constructs": "^10.6.0",
     "source-map-support": "^0.5.21"
@@ -17,7 +17,7 @@
     "@types/aws-lambda": "^8.10.145",
     "@types/node": "^20.14.15",
     "aws-cdk": "^2.1129.0",
-    "local-lambda": "0.0.0",
+    "bifrost": "0.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4"
   }

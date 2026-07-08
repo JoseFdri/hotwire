@@ -1,16 +1,17 @@
-# local-lambda
+# Bifrost
 
 Live Lambda Dev for AWS CDK — the same "edit code, no redeploy" workflow SST's Live Lambda Dev
 gives you, but for plain CDK apps. Real AWS resources (API Gateway, SQS, EventBridge, ...) invoke
-your Lambda, but the handler actually runs on your machine, against your live source.
+your Lambda, but the handler actually runs on your machine, against your live source. Bifrost is
+the bridge between the two.
 
 ## Why
 
 Without this, iterating on a Lambda means `cdk deploy` on every change — minutes per cycle, no
-breakpoints, no fast feedback. `local-lambda` deploys a thin **stub** in place of your real
-handler. The stub forwards every invocation to your laptop, your real handler runs there (hot
-reloaded on save), and the result flows back through the same real trigger. To API Gateway/SQS/etc.
-it looks like a normal Lambda that's just a bit slower.
+breakpoints, no fast feedback. Bifrost deploys a thin **stub** in place of your real handler. The
+stub forwards every invocation to your laptop, your real handler runs there (hot reloaded on save),
+and the result flows back through the same real trigger. To API Gateway/SQS/etc. it looks like a
+normal Lambda that's just a bit slower.
 
 ## How it works
 
@@ -19,7 +20,7 @@ it looks like a normal Lambda that's just a bit slower.
           │
           ▼
  ┌────────────────────┐        AWS IoT Core         ┌──────────────────────────────┐
- │  Stub Lambda        │◄──── MQTT over WSS ───────►│  local-lambda dev (your laptop) │
+ │  Stub Lambda        │◄──── MQTT over WSS ───────►│  bifrost dev (your laptop)     │
  │  (deployed in dev   │                             │  - esbuild bundles + watches   │
  │   mode)              │                             │  - runs handler in a worker    │
  └────────────────────┘                             │  - hot reload on save          │
@@ -42,7 +43,7 @@ it looks like a normal Lambda that's just a bit slower.
   (they're only known after deploy) — the CLI independently recomputes them the same way the
   construct does, from your AWS account/region.
 - **Zero footprint in prod**: `LiveFunction` only behaves differently when synthesized with
-  `-c local-lambda:live=true`. Without that flag it's a plain `NodejsFunction` — no stub, no IoT
+  `-c bifrost:live=true`. Without that flag it's a plain `NodejsFunction` — no stub, no IoT
   permissions, no scratch bucket.
 
 ## Requirements
@@ -62,8 +63,8 @@ it looks like a normal Lambda that's just a bit slower.
 ## Install into an existing CDK project
 
 ```bash
-npm install --save-dev local-lambda
-npm install @local-lambda/construct
+npm install --save-dev bifrost
+npm install @bifrost/construct
 ```
 
 ## Usage
@@ -72,7 +73,7 @@ npm install @local-lambda/construct
 
 ```ts
 import { join } from "node:path";
-import { LiveFunction } from "@local-lambda/construct";
+import { LiveFunction } from "@bifrost/construct";
 
 const hello = new LiveFunction(this, "HelloFunction", {
   entry: join(__dirname, "..", "functions", "hello.ts"),
@@ -89,7 +90,7 @@ etc.) — `entry` and `stage` are the only additions.
 **2. Deploy once with live mode enabled:**
 
 ```bash
-npx cdk deploy -c local-lambda:live=true -c stage=dev
+npx cdk deploy -c bifrost:live=true -c stage=dev
 ```
 
 This deploys the stub + supporting infra (S3 scratch bucket, IoT endpoint lookup, IAM grants) —
@@ -98,7 +99,7 @@ everything the CLI needs to talk to your function.
 **3. Start the local dev loop:**
 
 ```bash
-npx local-lambda dev --stage dev
+npx bifrost dev --stage dev
 ```
 
 This synthesizes your app, finds every `LiveFunction`, connects to IoT Core, and starts serving
@@ -106,7 +107,7 @@ invocations against your local handler source. Edit a handler file and save — 
 picks it up immediately, no redeploy.
 
 **4. Hit the real endpoint** (API Gateway URL, SQS queue, etc.) as usual. Requests execute your
-local code and stream logs/results back to the terminal running `local-lambda dev`.
+local code and stream logs/results back to the terminal running `bifrost dev`.
 
 **5. Ship normally** — deploy without the context flag (or with it `false`) and you get the real
 handler, no stub, no live-dev resources:
@@ -118,7 +119,7 @@ npx cdk deploy -c stage=prod
 ### CLI options
 
 ```
-local-lambda dev --stage <stage> [--app <dir>] [--region <region>]
+bifrost dev --stage <stage> [--app <dir>] [--region <region>]
 ```
 
 - `--stage` — must match the `stage` you deployed the stack with.
@@ -128,10 +129,10 @@ local-lambda dev --stage <stage> [--app <dir>] [--region <region>]
 ## Limitations
 
 - Node.js/TypeScript handlers only.
-- One active local dev session per function at a time — if two people run `local-lambda dev`
+- One active local dev session per function at a time — if two people run `bifrost dev`
   against the same deployed stage, whichever subscribes last "wins" invocations (use separate
   stages per developer, e.g. `--stage alice`).
-- If `local-lambda dev` isn't running (or isn't connected), the deployed stub returns a clear error
+- If `bifrost dev` isn't running (or isn't connected), the deployed stub returns a clear error
   rather than hanging until timeout.
 - Requires outbound network access to AWS IoT Core from your machine.
 
@@ -142,7 +143,7 @@ packages/
   core/       shared message protocol + IoT transport (used by stub and cli)
   stub/       the code deployed in place of your handler in dev mode
   construct/  the LiveFunction / LiveApp CDK constructs you consume
-  cli/        the `local-lambda` CLI (the `dev` command)
+  cli/        the `bifrost` CLI (the `dev` command)
 examples/
   basic-api/  a minimal API Gateway + Lambda CDK app used for end-to-end testing
 ```
@@ -153,5 +154,5 @@ examples/
 npm install        # installs and links all workspace packages
 npm run build       # builds core → stub → construct → cli
 npm run test        # unit tests (protocol round-trips) + CDK assertion tests
-cd examples/basic-api && npx cdk synth -c local-lambda:live=true -c stage=dev
+cd examples/basic-api && npx cdk synth -c bifrost:live=true -c stage=dev
 ```

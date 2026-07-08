@@ -26,14 +26,14 @@ interface TreeNode {
   children?: Record<string, TreeNode>;
 }
 
-/** Runs `cdk synth -c local-lambda:live=true` and reads discovery attributes back out of tree.json. */
+/** Runs `cdk synth -c bifrost:live=true` and reads discovery attributes back out of tree.json. */
 export async function discoverLiveFunctions(options: SynthOptions): Promise<DiscoveredFunction[]> {
-  const outDir = await mkdtemp(join(tmpdir(), "local-lambda-synth-"));
+  const outDir = await mkdtemp(join(tmpdir(), "bifrost-synth-"));
   try {
     await runCdkSynth(options, outDir);
     const treePath = join(outDir, "tree.json");
     if (!existsSync(treePath)) {
-      throw new Error(`local-lambda: cdk synth did not produce tree.json in ${outDir}`);
+      throw new Error(`bifrost: cdk synth did not produce tree.json in ${outDir}`);
     }
     const tree = JSON.parse(await readFile(treePath, "utf8")) as { tree: TreeNode };
     const found: DiscoveredFunction[] = [];
@@ -45,7 +45,7 @@ export async function discoverLiveFunctions(options: SynthOptions): Promise<Disc
 }
 
 function walk(node: TreeNode, found: DiscoveredFunction[]): void {
-  const attr = node.attributes?.["local-lambda:function"];
+  const attr = node.attributes?.["bifrost:function"];
   if (attr) found.push(attr as DiscoveredFunction);
   for (const child of Object.values(node.children ?? {})) {
     walk(child, found);
@@ -61,7 +61,7 @@ function runCdkSynth(options: SynthOptions, outDir: string): Promise<void> {
     "-o",
     outDir,
     "-c",
-    "local-lambda:live=true",
+    "bifrost:live=true",
     "-c",
     `stage=${options.stage}`,
   ];
@@ -79,7 +79,7 @@ function runCdkSynth(options: SynthOptions, outDir: string): Promise<void> {
     child.on("error", reject);
     child.on("exit", (code) => {
       if (code === 0) resolve();
-      else reject(new Error(`local-lambda: cdk synth failed (exit ${code}):\n${stderr}`));
+      else reject(new Error(`bifrost: cdk synth failed (exit ${code}):\n${stderr}`));
     });
   });
 }

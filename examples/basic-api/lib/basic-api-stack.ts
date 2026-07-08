@@ -2,7 +2,7 @@ import { join } from "node:path";
 import { Stack, StackProps, CfnOutput } from "aws-cdk-lib";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
 import { Construct } from "constructs";
-import { LiveFunction } from "@local-lambda/construct";
+import { LiveFunction } from "@bifrost/construct";
 
 export interface BasicApiStackProps extends StackProps {
   stage: string;

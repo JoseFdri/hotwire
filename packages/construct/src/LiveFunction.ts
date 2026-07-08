@@ -2,7 +2,7 @@ import { Duration, Stack, type IInspectable, type TreeInspector } from "aws-cdk-
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as nodejs from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
-import { requestTopic } from "@local-lambda/core";
+import { requestTopic } from "@bifrost/core";
 import { isLiveMode, LiveApp, resolveStubEntry } from "./LiveApp.js";
 
 export interface LiveFunctionProps extends Omit<nodejs.NodejsFunctionProps, "code"> {
@@ -20,8 +20,8 @@ function sanitizeTopicSegment(nodePath: string): string {
 
 /**
  * Drop-in replacement for `NodejsFunction`. In normal deploys it behaves identically. When
- * synthesized with `-c local-lambda:live=true`, it instead deploys a thin stub that forwards each
- * invocation to whichever local `local-lambda dev` session is connected, so the real handler runs
+ * synthesized with `-c bifrost:live=true`, it instead deploys a thin stub that forwards each
+ * invocation to whichever local `bifrost dev` session is connected, so the real handler runs
  * on the developer's machine against live source.
  */
 export class LiveFunction extends Construct implements IInspectable {
@@ -49,12 +49,12 @@ export class LiveFunction extends Construct implements IInspectable {
       timeout: Duration.minutes(15),
       environment: {
         ...props.environment,
-        LOCAL_LAMBDA_IOT_ENDPOINT: liveApp.iotEndpoint,
-        LOCAL_LAMBDA_REGION: Stack.of(this).region,
-        LOCAL_LAMBDA_APP: liveApp.appName,
-        LOCAL_LAMBDA_STAGE: liveApp.stage,
-        LOCAL_LAMBDA_FUNCTION_ID: this.functionId,
-        LOCAL_LAMBDA_SCRATCH_BUCKET: liveApp.scratchBucket.bucketName,
+        BIFROST_IOT_ENDPOINT: liveApp.iotEndpoint,
+        BIFROST_REGION: Stack.of(this).region,
+        BIFROST_APP: liveApp.appName,
+        BIFROST_STAGE: liveApp.stage,
+        BIFROST_FUNCTION_ID: this.functionId,
+        BIFROST_SCRATCH_BUCKET: liveApp.scratchBucket.bucketName,
       },
     });
 
@@ -73,9 +73,9 @@ export class LiveFunction extends Construct implements IInspectable {
     };
   }
 
-  /** Surfaces discovery attributes into cdk.out/tree.json for the `local-lambda` CLI to read. */
+  /** Surfaces discovery attributes into cdk.out/tree.json for the `bifrost` CLI to read. */
   inspect(inspector: TreeInspector): void {
     if (!this.discoveryAttributes) return;
-    inspector.addAttribute("local-lambda:function", this.discoveryAttributes);
+    inspector.addAttribute("bifrost:function", this.discoveryAttributes);
   }
 }

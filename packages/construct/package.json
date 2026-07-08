@@ -1,5 +1,5 @@
 {
-  "name": "@local-lambda/construct",
+  "name": "@bifrost/construct",
   "version": "0.0.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -9,8 +9,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@local-lambda/core": "0.0.0",
-    "@local-lambda/stub": "0.0.0"
+    "@bifrost/core": "0.0.0",
+    "@bifrost/stub": "0.0.0"
   },
   "peerDependencies": {
     "aws-cdk-lib": "^2.150.0",

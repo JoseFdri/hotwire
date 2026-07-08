@@ -27,11 +27,11 @@ export async function watchBundle(entry: string, outfile: string, absWorkingDir:
     logLevel: "silent",
     plugins: [
       {
-        name: "local-lambda-notify",
+        name: "bifrost-notify",
         setup(build) {
           build.onEnd((result) => {
             if (result.errors.length > 0) {
-              console.error(`local-lambda: build error in ${entry}:`, result.errors);
+              console.error(`bifrost: build error in ${entry}:`, result.errors);
               return;
             }
             if (isFirstBuild) {

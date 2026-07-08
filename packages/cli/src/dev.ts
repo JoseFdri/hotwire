@@ -17,7 +17,7 @@ import {
   type RequestEnvelope,
   type ResponseEnvelope,
   type ScratchStore,
-} from "@local-lambda/core";
+} from "@bifrost/core";
 import { discoverLiveFunctions, type DiscoveredFunction } from "./discovery.js";
 import { watchBundle, type HandlerBundle } from "./bundler.js";
 import { createHandlerWorker, type HandlerWorker } from "./runtime.js";
@@ -36,37 +36,37 @@ interface RunningFunction {
 }
 
 export async function runDev(options: DevOptions): Promise<void> {
-  console.log("local-lambda: synthesizing CDK app to discover live functions...");
+  console.log("bifrost: synthesizing CDK app to discover live functions...");
   const functions = await discoverLiveFunctions({ appDir: options.appDir, stage: options.stage });
   if (functions.length === 0) {
     console.log(
-      "local-lambda: no LiveFunction constructs found. Is your app synthesized with `-c local-lambda:live=true`?",
+      "bifrost: no LiveFunction constructs found. Is your app synthesized with `-c bifrost:live=true`?",
     );
     return;
   }
-  console.log(`local-lambda: found ${functions.length} live function(s): ${functions.map((f) => f.functionId).join(", ")}`);
+  console.log(`bifrost: found ${functions.length} live function(s): ${functions.map((f) => f.functionId).join(", ")}`);
 
   const sts = new STSClient(options.region ? { region: options.region } : {});
   const region = options.region ?? (await sts.config.region());
   const { Account: account } = await sts.send(new GetCallerIdentityCommand({}));
-  if (!account) throw new Error("local-lambda: could not resolve the current AWS account (check your credentials)");
+  if (!account) throw new Error("bifrost: could not resolve the current AWS account (check your credentials)");
 
   const iot = new IoTClient({ region });
   const { endpointAddress } = await iot.send(new DescribeEndpointCommand({ endpointType: "iot:Data-ATS" }));
-  if (!endpointAddress) throw new Error("local-lambda: could not resolve the AWS IoT Core endpoint");
+  if (!endpointAddress) throw new Error("bifrost: could not resolve the AWS IoT Core endpoint");
 
-  console.log(`local-lambda: connecting to IoT Core at ${endpointAddress}...`);
+  console.log(`bifrost: connecting to IoT Core at ${endpointAddress}...`);
   const transport = await connectIot({
     endpoint: endpointAddress,
     region,
-    clientId: `local-lambda-cli-${process.pid}-${Date.now()}`,
+    clientId: `bifrost-cli-${process.pid}-${Date.now()}`,
   });
 
-  const buildDir = await mkdtemp(join(tmpdir(), "local-lambda-build-"));
+  const buildDir = await mkdtemp(join(tmpdir(), "bifrost-build-"));
   const running: RunningFunction[] = [];
 
   const shutdown = async () => {
-    console.log("\nlocal-lambda: shutting down...");
+    console.log("\nbifrost: shutting down...");
     await Promise.all(
       running.map(async (r) => {
         await transport.unsubscribe(r.config.requestTopic).catch(() => {});
@@ -109,7 +109,7 @@ export async function runDev(options: DevOptions): Promise<void> {
     console.log(`[${config.functionId}] listening on ${config.requestTopic}`);
   }
 
-  console.log("local-lambda: ready. Waiting for invocations (Ctrl+C to stop)...");
+  console.log("bifrost: ready. Waiting for invocations (Ctrl+C to stop)...");
 }
 
 async function handleRequest(transport: LiveTransport, entry: RunningFunction, payload: Buffer): Promise<void> {

@@ -3,11 +3,11 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as cr from "aws-cdk-lib/custom-resources";
 import { Construct } from "constructs";
-import { scratchBucketName, topicPrefix } from "@local-lambda/core";
+import { scratchBucketName, topicPrefix } from "@bifrost/core";
 
-const CONTEXT_KEY = "local-lambda:live";
+const CONTEXT_KEY = "bifrost:live";
 
-/** True when the app was synthesized with `-c local-lambda:live=true` (or the legacy `-c live=true`). */
+/** True when the app was synthesized with `-c bifrost:live=true` (or the legacy `-c live=true`). */
 export function isLiveMode(scope: Construct): boolean {
   const value = scope.node.tryGetContext(CONTEXT_KEY) ?? scope.node.tryGetContext("live");
   return value === true || value === "true";
@@ -28,7 +28,7 @@ export interface LiveAppProps {
 export class LiveApp extends Construct {
   static getOrCreate(scope: Construct, props: LiveAppProps): LiveApp {
     const stack = Stack.of(scope);
-    const id = "LocalLambdaLiveApp";
+    const id = "BifrostApp";
     const existing = stack.node.tryFindChild(id) as LiveApp | undefined;
     return existing ?? new LiveApp(stack, id, props);
   }
@@ -47,7 +47,7 @@ export class LiveApp extends Construct {
     const { account, region } = Stack.of(this);
     if (Token.isUnresolved(account) || Token.isUnresolved(region)) {
       throw new Error(
-        "local-lambda: LiveFunction/LiveApp requires the Stack to have a concrete `env: { account, region }` " +
+        "bifrost: LiveFunction/LiveApp requires the Stack to have a concrete `env: { account, region }` " +
           "(not environment-agnostic) — the local CLI needs to independently derive the same scratch bucket " +
           "name and IoT region your stack deploys to.",
       );
@@ -110,5 +110,5 @@ export class LiveApp extends Construct {
 
 /** Absolute path to the stub package's compiled handler, for use as a Lambda `entry`. */
 export function resolveStubEntry(): string {
-  return require.resolve("@local-lambda/stub/dist/handler.js");
+  return require.resolve("@bifrost/stub/dist/handler.js");
 }

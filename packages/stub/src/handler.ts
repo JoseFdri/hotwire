@@ -12,7 +12,7 @@ import {
   type LiveTransport,
   type RequestEnvelope,
   type ResponseEnvelope,
-} from "@local-lambda/core";
+} from "@bifrost/core";
 
 /**
  * Deployed in place of the real handler when a `LiveFunction` is synthesized in dev mode. Forwards
@@ -27,8 +27,8 @@ let transportPromise: Promise<LiveTransport> | undefined;
 function getTransport(): Promise<LiveTransport> {
   if (!transportPromise) {
     transportPromise = connectIot({
-      endpoint: requireEnv("LOCAL_LAMBDA_IOT_ENDPOINT"),
-      region: process.env.LOCAL_LAMBDA_REGION,
+      endpoint: requireEnv("BIFROST_IOT_ENDPOINT"),
+      region: process.env.BIFROST_REGION,
       clientId: `stub-${process.env.AWS_LAMBDA_LOG_STREAM_NAME ?? Math.random().toString(36).slice(2)}`,
     }).catch((err) => {
       // Allow retry on the next invocation instead of caching a failed connection forever.
@@ -41,15 +41,15 @@ function getTransport(): Promise<LiveTransport> {
 
 function requireEnv(name: string): string {
   const value = process.env[name];
-  if (!value) throw new Error(`local-lambda stub: missing required env var ${name}`);
+  if (!value) throw new Error(`bifrost stub: missing required env var ${name}`);
   return value;
 }
 
 export const handler: Handler = async (event, context: Context) => {
-  const appName = requireEnv("LOCAL_LAMBDA_APP");
-  const stage = requireEnv("LOCAL_LAMBDA_STAGE");
-  const functionId = requireEnv("LOCAL_LAMBDA_FUNCTION_ID");
-  const bucket = requireEnv("LOCAL_LAMBDA_SCRATCH_BUCKET");
+  const appName = requireEnv("BIFROST_APP");
+  const stage = requireEnv("BIFROST_STAGE");
+  const functionId = requireEnv("BIFROST_FUNCTION_ID");
+  const bucket = requireEnv("BIFROST_SCRATCH_BUCKET");
 
   const scratch = { s3: new S3Client({}), bucket };
   const transport = await getTransport();
@@ -82,8 +82,8 @@ export const handler: Handler = async (event, context: Context) => {
       transport.unsubscribe(respTopic).catch(() => {});
       reject(
         new Error(
-          "local-lambda: no local dev session responded before the deadline. " +
-            "Is `local-lambda dev` running and connected?",
+          "bifrost: no local dev session responded before the deadline. " +
+            "Is `bifrost dev` running and connected?",
         ),
       );
     }, Math.max(deadlineMs - Date.now(), 0));
@@ -106,7 +106,7 @@ export const handler: Handler = async (event, context: Context) => {
   });
 
   if (!response.ok) {
-    const err = new Error(response.error?.message ?? "local-lambda: handler failed");
+    const err = new Error(response.error?.message ?? "bifrost: handler failed");
     err.name = response.error?.name ?? "Error";
     if (response.error?.stack) err.stack = response.error.stack;
     throw err;

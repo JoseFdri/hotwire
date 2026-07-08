@@ -35,7 +35,7 @@ async function main(): Promise<void> {
   const mod = await import(pathToFileURL(bundlePath).href);
   const handlerFn = mod[handlerName] ?? mod.default?.[handlerName];
   if (typeof handlerFn !== "function") {
-    throw new Error(`local-lambda: exported handler "${handlerName}" not found in ${bundlePath}`);
+    throw new Error(`bifrost: exported handler "${handlerName}" not found in ${bundlePath}`);
   }
 
   parentPort!.on("message", async (msg: InvokeMessage) => {
