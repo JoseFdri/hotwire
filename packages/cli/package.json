@@ -1,0 +1,26 @@
+{
+  "name": "local-lambda",
+  "version": "0.0.0",
+  "bin": {
+    "local-lambda": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@local-lambda/core": "0.0.0",
+    "@aws-sdk/client-iot": "^3.629.0",
+    "@aws-sdk/client-s3": "^3.629.0",
+    "@aws-sdk/client-sts": "^3.629.0",
+    "commander": "^12.1.0",
+    "esbuild": "^0.23.1"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.145",
+    "@types/node": "^20.14.15",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  }
+}

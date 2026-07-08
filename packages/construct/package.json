@@ -1,0 +1,26 @@
+{
+  "name": "@local-lambda/construct",
+  "version": "0.0.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@local-lambda/core": "0.0.0",
+    "@local-lambda/stub": "0.0.0"
+  },
+  "peerDependencies": {
+    "aws-cdk-lib": "^2.150.0",
+    "constructs": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.15",
+    "aws-cdk-lib": "^2.261.0",
+    "constructs": "^10.6.0",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@local-lambda/stub",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@local-lambda/core": "0.0.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.145",
+    "@types/node": "^20.14.15",
+    "typescript": "^5.5.4"
+  }
+}
